@@ -266,19 +266,71 @@ Group by I.film_id, F.title
 order by count_rented Desc
 ;
 
-/* 7f. Write a query to display how much business, in dollars, each store brought in. */
+/* 7f. Write a query to display how much business, in dollars, each store brought in. 
+Use  PAYMENT, CUSTOMER */
+SELECT    C.store_id, Sum(P.amount) as Total_store
+    From  Payment  P
+         ,Customer C
+         
+	where  P.customer_id = C.customer_id 
+    Group by C.store_id
+;
+
 
 /* 7g. Write a query to display for each store its store ID, city, and country.*/
+-- Use Store, address, city country
+SELECT S.store_id, CI.city, CN.country
+ FROM  STORE   S
+      ,ADDRESS A
+      ,CITY    CI
+      ,COUNTRY CN
+ 
+ where S.address_id  = A.address_id
+   and A.city_id     = CI.city_id
+   and CI.country_id = CN.country_id
+;
 
 /* 7h. List the top five genres in gross revenue in descending order. (**Hint**: you may need to 
 use the following tables: category, film_category, inventory, payment, and rental.)*/
+SELECT C.name as Genre, sum(P.AMOUNT) as Gross_revenue
+  FROM   PAYMENT  P
+		,RENTAL   R
+        ,inventory I
+        ,FILM_CATEGORY FC
+        ,Category  C
+WHERE    P.rental_id = R.rental_id
+  AND    R.inventory_id = I.inventory_id
+  AND    I.film_id      = FC.film_id
+  AND    FC.category_id = C.category_id
+GROUP BY C.name
+ORDER BY 2 DESC
+LIMIT  5 
+;  
 
 /* 8a. In your new role as an executive, you would like to have an easy way of viewing 
 the Top five genres by gross revenue. Use the solution from the problem above to create a view. 
 If you haven't solved 7h, you can substitute another query to create a view.*/
+CREATE VIEW Gross_revenue_genre as 
+	(SELECT C.name as Genre, sum(P.AMOUNT) as Gross_revenue
+	  FROM   PAYMENT  P
+			,RENTAL   R
+			,inventory I
+			,FILM_CATEGORY FC
+			,Category  C
+	WHERE    P.rental_id = R.rental_id
+	  AND    R.inventory_id = I.inventory_id
+	  AND    I.film_id      = FC.film_id
+	  AND    FC.category_id = C.category_id
+	GROUP BY C.name
+	ORDER BY 2 DESC
+	LIMIT  5 )
+;
 
-/* 8b. How would you display the view that you created in 8a?*/
+/* 8b. How would you display the view that you created in 8a?*/ 
+SHOW CREATE VIEW Gross_revenue_genre;
+-- Use below query to display all rows from the view. 
+SELECT * FROM Gross_revenue_genre ;
 
-
-
-
+-- 8c. You find that you no longer need the view `top_five_genres`. Write a query 
+-- to delete it.
+DROP VIEW Gross_revenue_genre;
