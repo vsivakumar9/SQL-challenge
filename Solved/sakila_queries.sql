@@ -220,36 +220,64 @@ SELECT title
  ;
 
 -- 7b. Use subqueries to display all actors who appear in the film `Alone Trip`.
-SELECT    FA.film_id, 
-          F.title,
-          FA.actor_id, 
-          A.first_name, 
-          A.last_name 
-          
-  FROM    ACTOR       A
-		 ,FILM        F
-	     ,FILM_ACTOR  FA
-      
-  WHERE   F.title = 'Alone Trip'
-    AND   F.film_id = FA.film_id
-	AND   A.actor_id = FA.actor_id 
-	AND   FA.actor_id in ( SELECT actor_id from FILM_ACTOR FA
-                            WHERE FA.film_id in 
-    
-                         )
+--     Film id is 17 for 'Alone Trip'
+select  A.first_name, A.last_name 
+  from  film_actor FA
+       ,actor       A
+where  FA.film_id = (SELECT FILM_ID FROM FILM F WHERE F.title = 'Alone Trip')
+  and  FA.actor_id = A.actor_id
+;
 	
-    
-    
-  
+ -- 7c. You want to run an email marketing campaign in Canada, for which you will need the names and 
+ -- email addresses of all Canadian customers. Use joins to retrieve this information.
+SELECT C.first_name, C.last_name, C.email
+  FROM CUSTOMER C
+ WHERE address_id in (select  A.address_id 
+                        from  ADDRESS A
+                             ,CITY    CI
+                             ,COUNTRY CN
+                       where  A.city_id     = CI.city_id
+                         AND  CI.country_id = CN.country_id
+                         AND  CN.country = 'Canada')
+					  
+;
+-- 7d.
+-- Sales have been lagging among young families, and you wish to target all family movies 
+-- for a promotion. Identify all movies categorized as family films.
+SELECT F.title, F.description
+  from FILM F
+ WHERE F.film_id in 
+                (select  FC.film_id 
+                   from  film_category FC
+                        ,Category      C
+				  where  FC.category_id = C.category_id
+                    and  C.name = 'Family'
+                )
+;				
+
+/* 7e. Display the most frequently rented movies in descending order. */
+select  I.film_id, F.title,  count(*) as count_rented
+ from   rental    R 
+       ,inventory I 
+       ,Film      F
+where   R.inventory_id = I.inventory_id
+  and   I.film_id      = F.film_id
+Group by I.film_id, F.title
+order by count_rented Desc
 ;
 
+/* 7f. Write a query to display how much business, in dollars, each store brought in. */
 
--- 7c.
+/* 7g. Write a query to display for each store its store ID, city, and country.*/
 
+/* 7h. List the top five genres in gross revenue in descending order. (**Hint**: you may need to 
+use the following tables: category, film_category, inventory, payment, and rental.)*/
 
--- 7d.
+/* 8a. In your new role as an executive, you would like to have an easy way of viewing 
+the Top five genres by gross revenue. Use the solution from the problem above to create a view. 
+If you haven't solved 7h, you can substitute another query to create a view.*/
 
-
+/* 8b. How would you display the view that you created in 8a?*/
 
 
 
